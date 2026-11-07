@@ -1,50 +1,75 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+SYNC IMPACT REPORT (scratch — remove before committing)
+Version change: [unversioned template] → 1.0.0 (initial adoption; no prior project values)
+Modified principles: none (template placeholders replaced)
+Added sections: Technology Constraints, Development Workflow
+Removed sections: none (template sections renamed to match the project)
+Deferred TODOs:
+  - TODO(RATIFICATION_DATE): original adoption date unknown; confirm and replace.
+-->
+
+# Getting Started Todo App Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Documented Scope
+The application MUST implement only the features listed in `requirements-KR.txt`: list, add,
+toggle completion, delete, greeting banner, and persistence selection. New features, user accounts,
+or authentication MUST NOT be added without first amending the requirements file.
+Rationale: the project is a teaching reference app; a fixed scope keeps it easy to verify.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Stable REST Contract
+The client and backend MUST communicate only through the documented `/api` endpoints
+(`GET /api/greeting`, `GET|POST /api/items`, `PUT|DELETE /api/items/:id`). Any change to a request
+or response shape MUST update `requirements-KR.txt` and both `backend/` and `client/` in the same
+change. The backend MUST generate item IDs as UUID v4 and MUST store new items with
+`completed: false`.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Pluggable Persistence
+All database access MUST go through `backend/src/persistence/`. Route handlers MUST NOT import
+database drivers (`mysql2`, `sqlite3`) directly. MySQL MUST be used when `MYSQL_HOST` is set;
+SQLite MUST be the default otherwise. Both backends MUST expose the same interface.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Verified Changes
+Every change MUST pass the checks that exist for the touched package before it is merged:
+backend unit tests (`npm test` in `backend/`, Jest), client lint (`npm run lint` in `client/`),
+and Prettier format checks (`npm run format-check`). Bug fixes MUST include a regression test
+in `backend/spec/` when the bug is in backend logic.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Declared Dependencies and Secrets
+Every package imported by source code MUST be declared in the `package.json` of its package.
+Lock files MUST be committed. Credentials MUST NOT be committed; database credentials MUST come
+from environment variables or `*_FILE` secret files, as supported by `backend/`.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technology Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Runtime: Node.js 22 (`Dockerfile` uses `node:22`).
+- Backend: Express 5, `mysql2` for MySQL, `sqlite3` for SQLite, `uuid`, `wait-port`.
+- Client: React 19 with Vite 6; Bootstrap 5 and react-bootstrap for UI; FontAwesome for icons.
+- Infrastructure: Docker and Docker Compose are the reference environment. MySQL 9.3 and Traefik v3.6
+  are used in `compose.yaml`. phpMyAdmin is for development only and MUST NOT be part of production
+  configuration.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Work on a feature or fix branch; commits go to `master` only through reviewed pull requests.
+- Commit messages MUST describe the change in one line (e.g., `fix: ...`, `feat: ...`).
+- Prettier formatting is applied before commit; formatting-only changes MUST NOT be mixed with
+  behavior changes in the same commit.
+- Before requesting review, run the Core Principle IV checks and note the results in the PR.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes other project practices. Amendments MUST be made by a pull request
+that updates this file, the Sync Impact Report, and any dependent documentation
+(`requirements-KR.txt`) in the same change.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Versioning follows semantic versioning:
+- MAJOR: a principle is removed or redefined in a backward-incompatible way.
+- MINOR: a principle or section is added, or existing guidance is materially expanded.
+- PATCH: wording, clarification, or typo fixes with no change in meaning.
+
+Compliance: every PR review MUST confirm that the change respects Principles I–V. Any deviation
+MUST be justified in the PR description.
+
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2026-11-07
